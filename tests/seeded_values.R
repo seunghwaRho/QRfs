@@ -1,0 +1,17 @@
+# Seeded values of the manual and vignette (library e2b1969e, 2026-10-19).
+library(QRfs)
+near <- function(x, y, tol = 5e-5) stopifnot(abs(as.numeric(x) - y) < tol)
+fm <- ggdp_h1 ~ ggdp + NFCI
+r <- qrfstest_stacked(fm, adrian, "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "ker-har", arg_seed = 1)
+near(r$stat, 26.7145); near(r$cv, 6.3898); stopifnot(r$M_effective == 3L)
+r <- qrfstest_stacked(fm, adrian, "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "os-har")
+near(r$stat, 26.5851); near(r$cv, 6.3555); stopifnot(r$K_effective == 69L)
+r <- qrhac(fm, adrian, "NFCI[0.05] = NFCI[0.5] = NFCI[0.95]", "ker-har")
+near(r$stat, 20.3682); near(r$cv, stats::qchisq(0.95, 2)); stopifnot(r$M_effective == 1L)
+r <- qrhac(fm, adrian, "NFCI[0.05] = NFCI[0.5] = NFCI[0.95]", "os-har")
+near(r$stat, 28.4090); stopifnot(r$K_effective == 116L)
+r <- qrfstest_sup(fm, adrian, "NFCI = 0", "os-har", arg_seed = 1)
+stopifnot(inherits(r, "qrfstest"), !is.null(r$band), nrow(r$band) == 5L)
+s <- capture.output(print(summary(r))); stopifnot(any(grepl("Algorithm 1", s)))
+r <- qrfstest_shape(fm, adrian, "NFCI", "os-har", arg_test = "homogeneity", arg_seed = 1)
+stopifnot(length(r$t_ratio) == 4L)

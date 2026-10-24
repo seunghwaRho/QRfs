@@ -1,0 +1,15 @@
+.Rhistory
+.RData
+.Rproj.user
+.DS_Store
+*.Rcheck/
+*.tar.gz
+vignettes/*.aux
+vignettes/*.bbl
+vignettes/*.blg
+vignettes/*.log
+vignettes/*.out
+vignettes/*.toc
+vignettes/QRfs.tex
+vignettes/QRfs-*.pdf
+vignettes/QRfs.pdf

@@ -1,0 +1,8 @@
+export(qrfstest_stacked, qrfstest_sup, qrfstest_shape, qrhac, uniform_CI_band, qrfs_example)
+S3method(print, qrfstest)
+S3method(summary, qrfstest)
+S3method(print, summary.qrfstest)
+S3method(plot, qrfstest)
+S3method(coef, qrfstest)
+importFrom(stats, coef, model.frame)
+importFrom(graphics, plot)

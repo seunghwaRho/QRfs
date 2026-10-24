@@ -1,0 +1,27 @@
+Package: QRfs
+Type: Package
+Title: Fixed-Smoothing Uniform Inference for Quantile Regression
+Version: 0.1.0
+Authors@R: c(
+    person("Kaicheng", "Chen", role = "aut"),
+    person("Antonio F.", "Galvao", role = "aut"),
+    person("Seunghwa", "Rho", role = c("aut", "cre"), email = "srhoecon@hanyang.ac.kr"),
+    person("Timothy J.", "Vogelsang", role = "aut"),
+    person("Jungmo", "Yoon", role = "aut"))
+Description: Fixed-b and fixed-K heteroskedasticity and autocorrelation robust (HAR) inference for
+    time-series quantile regression, following Chen, Galvao, Rho, Vogelsang and Yoon (2026),
+    "Fixed-smoothing Uniform Inference for Quantile Regression": stack-Wald tests of joint
+    restrictions at specified quantiles, uniform sup tests over a range of quantiles with uniform
+    confidence bands, tests that a coefficient is constant or monotone in the quantile, and the
+    conventional small-b or large-K test with chi-square critical values. One kernel (Bartlett)
+    and one orthonormal series basis (DCT-II), with test-based and MSE-optimal data-dependent
+    smoothing. Includes the growth-vulnerability data of Adrian, Boyarchenko and Giannone (2019)
+    <doi:10.1257/aer.20161923>.
+License: GPL (>= 3)
+Encoding: UTF-8
+Depends: R (>= 3.6.0)
+Imports: quantreg, Matrix, mvtnorm, stats, graphics, utils
+Suggests: pbivnorm
+LazyData: true
+URL: https://github.com/seunghwaRho/QRfs
+BugReports: https://github.com/seunghwaRho/QRfs/issues

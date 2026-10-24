@@ -1,0 +1,9 @@
+^README\.md$
+^data-raw$
+^\.github$
+^\.gitignore$
+^LICENSE\.md$
+^.*\.Rcheck$
+^.*\.tar\.gz$
+^.*\.Rproj$
+^\.Rproj\.user$

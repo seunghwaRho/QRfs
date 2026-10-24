@@ -1,0 +1,630 @@
+\documentclass[10pt,letterpaper]{article}
+%\VignetteIndexEntry{Using QRfs: Fixed-Smoothing Inference for Growth Vulnerability}
+%\VignetteKeywords{quantile regression, HAR inference, fixed-b, fixed-K}
+%\VignettePackage{QRfs}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,graphicx,booktabs,tabularx,needspace}
+\usepackage{listings,xcolor,placeins}
+\usepackage[noae]{Sweave}
+\SweaveOpts{keep.source=TRUE}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\hypersetup{pdftitle={Using QRfs: Fixed-Smoothing Inference for Growth Vulnerability},pdfsubject={An R usage vignette}}
+\lstset{language=R,basicstyle=\small\ttfamily,columns=fullflexible,keepspaces=true,
+  keywordstyle=\bfseries\color{blue!60!black},commentstyle=\color{gray!70!black}\itshape,
+  stringstyle=\color{green!40!black},showstringspaces=false,breaklines=true,
+  frame=single,framerule=0.4pt,rulecolor=\color{gray!40},backgroundcolor=\color{gray!6},
+  xleftmargin=5pt,xrightmargin=5pt,aboveskip=0.6em,belowskip=0.6em}
+\lstdefinestyle{Rout}{language=,basicstyle=\small\ttfamily,keywordstyle=\ttfamily,
+  commentstyle=\ttfamily,stringstyle=\ttfamily,backgroundcolor=\color{white},
+  frame=single,rulecolor=\color{gray!25}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4em}
+\raggedbottom
+\widowpenalty=10000
+\clubpenalty=10000
+\newcommand{\NFCI}{\mathrm{NFCI}}
+\newcommand{\ggdp}{\mathrm{ggdp}}
+\newcommand{\ggdph}{\mathrm{ggdp\_h1}}
+\newcommand{\bN}{\beta_{\NFCI}}
+\newcommand{\bG}{\beta_{\ggdp}}
+\title{Using QRfs: Fixed-Smoothing Inference\\for Growth Vulnerability}
+\author{}
+\date{\today}
+\begin{document}
+\maketitle
+
+This vignette shows how to specify a model, state a hypothesis, and read the result using
+\texttt{QRfs}. The application follows the predictive quantile regression of
+\citet{adrian2019}. The tests use the fixed-smoothing
+inference procedures of \citet{chen2026}.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Function & Purpose \\
+\midrule
+\texttt{qrfstest\_stacked} & Tests a hypothesis jointly at a few specified quantiles. \\
+\texttt{qrfstest\_sup} & Tests a hypothesis uniformly over a range of quantiles. \\
+\texttt{qrfstest\_shape} & Tests monotonicity or homogeneity. \\
+\texttt{qrhac} & Tests a hypothesis jointly at a few specified quantiles with the small-$b$ or
+  large-$K$ chi-square critical value. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Load the data and specify the model}
+
+Start by loading the package and the data:
+
+<<setup>>=
+library(QRfs)
+data(adrian)
+head(adrian, 3)
+@
+
+\texttt{ggdp} is the annualized real GDP growth rate. The variable \texttt{ggdp} is the rate in
+quarter $t$, and \texttt{ggdp\_h1} is the rate in quarter $t+1$.
+The data contain 171 usable observations. The \texttt{quarter} column labels quarter $t$,
+from 1973Q1 to 2015Q3.
+
+\citet{adrian2019} use current real GDP growth to measure economic conditions
+and the Chicago Fed National Financial Conditions Index (NFCI) to measure financial
+conditions. A higher NFCI indicates tighter financial conditions. They model
+``the full distribution of future real GDP growth as a function of current financial
+and economic conditions'' \citep[p.~1264]{adrian2019}.
+
+For the one-quarter horizon, $\ggdph_t=\ggdp_{t+1}$ and $x_t'=(1,\ggdp_t,\NFCI_t)$.
+Using the notation of \citet[Section~2]{chen2026}, the conditional quantile model is
+\begin{equation}
+ Q_{\ggdph_t}(\tau\mid x_t)=x_t'\beta(\tau)
+ =\beta_0(\tau)+\bG(\tau)\ggdp_t+\bN(\tau)\NFCI_t,
+ \qquad \tau\in\mathcal T\subset(0,1).
+ \label{eq:model}
+\end{equation}
+In R, model~\eqref{eq:model} is \texttt{ggdp\_h1 \textasciitilde\ ggdp + NFCI}.
+
+The examples use ordinary QR estimates from \texttt{quantreg} and HAR covariance
+estimators, which allow for heteroskedasticity and autocorrelation of the QR scores.
+Choose \texttt{arg\_har\_method = "ker-har"} for the Bartlett kernel, or
+\texttt{"os-har"} for the DCT-II orthonormal series. Fixed-smoothing inference keeps
+$b=M/T$ or $K$ fixed in the asymptotic approximation \citep[Sections~3--4]{chen2026}.
+
+The examples examine the predictive power of financial and economic conditions for
+future GDP growth using tests of the quantile coefficients.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{fig_biv.pdf}
+\caption{Estimated quantile coefficients in model~\eqref{eq:model}, on the grid
+$0.05,0.10,\ldots,0.95$. Circles mark $0.1,0.5,0.9$. Shading marks the lower-tail range
+$(0,0.25]$.}
+\label{fig:slopes}
+\end{figure}
+
+Figure~\ref{fig:slopes} shows the estimated quantile coefficients for financial
+and economic conditions. The examples below test their significance, equality across
+quantiles, and monotonicity.
+
+\section{Joint restrictions at specified quantiles: stack-Wald tests}
+
+\subsection{Stacked test with Bartlett HAR}
+
+Does the dependence of future GDP growth on current financial conditions differ
+across the lower tail, median, and upper tail, holding current GDP growth fixed?
+The relevant hypothesis would be
+\[
+ H_0:\ \bN(0.1)=\bN(0.5)=\bN(0.9),
+ \qquad H_A:\ \text{at least one equality fails}.
+\]
+The test statistic is the stack-Wald statistic of \citet[equation~16]{chen2026},
+\[
+ W=T\,r(\hat\beta(\bar\tau_m))'
+   \big[R\,\hat D(\bar\tau_m)^{-1}\hat\Lambda(\bar\tau_m,\bar\tau_m)\hat D(\bar\tau_m)^{-1}R'\big]^{-1}
+   r(\hat\beta(\bar\tau_m)),
+\]
+with $\bar\tau_m=\{0.1,0.5,0.9\}$, $r(\beta(\bar\tau_m))=R\beta(\bar\tau_m)$ the two equalities and
+$q=\operatorname{rank}(R)=2$. Under the Bartlett kernel with $b=M/T$ fixed,
+$W\Rightarrow W_q(1)'[P(\tilde W_q,b)]^{-1}W_q(1)$, the pivotal fixed-$b$ limit of
+\citet[equation~18]{chen2026}, from which the critical value is simulated. Under the OS estimator
+with $K$ fixed, $\frac{K-q+1}{qK}W\Rightarrow F_{q,K-q+1}$ \citep[equation~19]{chen2026}.
+\texttt{arg\_seed = 1} fixes the simulation seed, so that
+the printed numbers can be reproduced.
+
+<<stacked_ker>>=
+stacked_ker <- qrfstest_stacked(
+  arg_formula = ggdp_h1 ~ ggdp + NFCI,
+  arg_data = adrian,
+  arg_hypothesis = "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]",
+  arg_har_method = "ker-har",
+  arg_seed = 1
+)
+stacked_ker
+@
+
+The selected bandwidth is
+\texttt{stacked\_ker\$M\_effective}, which equals 3.
+
+\subsection{Stacked test with OS HAR}
+
+Change \texttt{arg\_har\_method} to use the orthonormal-series estimator:
+
+<<stacked_os>>=
+stacked_os <- qrfstest_stacked(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "os-har"
+)
+stacked_os
+@
+
+The same hypothesis can be supplied as two equality strings:
+
+<<equivalent_stacked_inputs>>=
+qrfstest_stacked(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  arg_hypothesis = c("NFCI[0.1] = NFCI[0.5]",
+                     "NFCI[0.5] = NFCI[0.9]"),
+  arg_har_method = "os-har"
+)
+@
+
+Equivalently, write the differences as equal to zero:
+
+<<equivalent_stacked_differences>>=
+qrfstest_stacked(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  arg_hypothesis = c("NFCI[0.1] - NFCI[0.5] = 0",
+                     "NFCI[0.5] - NFCI[0.9] = 0"),
+  arg_har_method = "os-har"
+)
+@
+
+To test equality across the three specified quantiles jointly for NFCI and GDP growth, use
+\[
+ H_0:\ \begin{cases}
+ \bG(0.1)=\bG(0.5)=\bG(0.9),\\
+ \bN(0.1)=\bN(0.5)=\bN(0.9).
+ \end{cases}
+\]
+The statistic is $W$ above with $q=4$ restrictions, and the limits are those of
+\citet[equations~18 and~19]{chen2026} with $q=4$.
+
+<<joint>>=
+joint <- qrfstest_stacked(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  arg_hypothesis = c(
+    "ggdp[0.1] = ggdp[0.5] = ggdp[0.9]",
+    "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]"
+  ),
+  arg_har_method = "os-har"
+)
+joint
+@
+
+\subsection{Stacked test with small-$b$ and large-$K$ chi-square critical values}
+
+Under traditional asymptotics, $b\to0$ and $K\to\infty$ as $T\to\infty$, labeled small-$b$ and
+large-$K$ asymptotics. Because small-$b$ and large-$K$ limits rely on consistency of the variance
+estimator, they do not depend on the kernel, bandwidth, or $K$ \citep[Section~2]{chen2026}, and the
+stack-Wald statistic has the $\chi^2_q$ limit. \texttt{qrhac} computes the same statistic as
+\texttt{qrfstest\_stacked} with the $\chi^2_q$ critical value. The kernel HAC estimator was studied
+by \citet{galvao2024} under traditional asymptotics for the bandwidth, with the MSE-optimal bandwidth
+of their Corollary~5.1. The test-based rules of \citet[Section~4.5]{chen2026} are based on
+higher-order expansions of the fixed-smoothing limits. The rule for the statistic in \texttt{qrhac} is
+therefore \texttt{arg\_M = "mse\_optimal\_ar"} or \texttt{arg\_K = "mse\_optimal\_var"}.
+\texttt{"test\_optimal"} or a number may be given instead, to use the same $M$ or $K$ as
+\texttt{qrfstest\_stacked} \citep[Section~5]{chen2026}.
+Nothing is simulated, so there is no \texttt{arg\_seed}.
+
+Does the dependence of future GDP growth on current financial conditions differ across the
+$0.05$, $0.5$ and $0.95$ quantiles?
+\[
+ H_0:\ \bN(0.05)=\bN(0.5)=\bN(0.95),
+ \qquad H_A:\ \text{at least one equality fails}.
+\]
+The statistic is the stack-Wald statistic $W$ with $\bar\tau_m=\{0.05,0.5,0.95\}$ and $q=2$. Under
+small-$b$ or large-$K$ asymptotics $W\Rightarrow\chi^2_q$, the limit of \citet[equation~18]{chen2026}
+as $b\to0$ and of \citet[equation~19]{chen2026} as $K\to\infty$, so the critical value is the
+$(1-\alpha)$ quantile of $\chi^2_2$.
+
+<<hac_ker>>=
+hac_ker <- qrhac(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI[0.05] = NFCI[0.5] = NFCI[0.95]", "ker-har"
+)
+hac_ker
+@
+
+<<hac_os>>=
+hac_os <- qrhac(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI[0.05] = NFCI[0.5] = NFCI[0.95]", "os-har"
+)
+hac_os
+@
+
+At a single quantile, the null is $H_0:\bN(0.9)=0$, with $q=1$ and the $\chi^2_1$ limit.
+
+<<hac_single>>=
+hac_single <- qrhac(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI[0.9] = 0", "ker-har"
+)
+hac_single
+@
+
+The result is printed with the method in its first line, small-$b$ Bartlett kernel HAC or
+large-$K$ orthonormal series HAR. \texttt{summary()} and \texttt{coef()} apply as for
+\texttt{qrfstest\_stacked}.
+
+\section{Uniform test}
+
+\subsection{Uniform sup test}
+
+This example uses the uniform sup test to examine the predictive power of the financial
+condition for future GDP growth.
+The hypothesis for the NFCI coefficient over $\mathcal T=(0,1)$ is
+\[
+ H_0:\ \bN(\tau)=0\ \text{for all }\tau\in(0,1),
+ \qquad H_A:\ \bN(\tau)\ne0\ \text{for some }\tau\in(0,1).
+\]
+The test statistic is the supremum over $\mathcal T$ of the Wald statistic at each quantile,
+evaluated on the grid $\{\tau_1,\dots,\tau_n\}$ that discretizes $\mathcal T$:
+\[
+ W_{\sup}(\mathcal T)=\max_{1\le i\le n}W(\tau_i),\qquad
+ W(\tau)=T\,r(\hat\beta(\tau))'\big[R(\hat\beta(\tau))\hat\Sigma(\tau)R(\hat\beta(\tau))'\big]^{-1}
+ r(\hat\beta(\tau)),
+\]
+the latter being the Wald statistic of \citet[equation~2]{chen2026} with
+$\hat\Sigma(\tau)=\hat D(\tau)^{-1}\hat\Lambda(\tau)\hat D(\tau)^{-1}$, as in Section~2.1 at a single
+quantile. Here $r(\beta(\tau))=\bN(\tau)$, and in the limit below $R_0=R(\beta_0(\tau))$.
+Its asymptotic distribution follows from \citet[equation~9]{chen2026}:
+\[
+ W_{\sup}(\mathcal T)\Rightarrow\max_{1\le i\le n}
+ \big(R_0D(\tau_i)^{-1}G(1,\tau_i)\big)'[H^{\iota}(\tau_i)]^{-1}\big(R_0D(\tau_i)^{-1}G(1,\tau_i)\big),
+ \qquad \iota=\mathrm{KE},\mathrm{OS},
+\]
+where, for the Bartlett kernel and the OS estimator respectively,
+\[
+ H^{\mathrm{KE}}(\tau)=R_0D(\tau)^{-1}P(\tilde G(r,\tau),b)D(\tau)^{-1}R_0',\qquad
+ H^{\mathrm{OS}}(\tau)=R_0D(\tau)^{-1}\Big[\tfrac{1}{K}\sum_{k=1}^K G_k(1,\tau)G_k(1,\tau)'\Big]D(\tau)^{-1}R_0'.
+\]
+This limit depends on $\Lambda(\tau_1,\tau_2)$ and is not pivotal. The critical value is its
+$(1-\alpha)$ quantile, simulated by Algorithm~1 of \citet{chen2026}.
+
+<<sup_nfci>>=
+sup_nfci <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI = 0", "ker-har",
+  arg_seed = 1
+)
+sup_nfci
+@
+
+When \texttt{arg\_tau\_grid} is not specified (\texttt{NULL}), the default grid is
+$\{0.1,0.3,0.5,0.7,0.9\}$ and the printed range is $(0,1)$. The grid discretizes the
+range. The calculation does not fit the continuum of quantiles.
+
+To examine the predictive power of the financial condition at the lower tails,
+apply the same test over $\mathcal T=(0,0.25]$. The null is
+\[
+ H_0:\ \bN(\tau)=0\quad\text{for all }\tau\in(0,0.25].
+\]
+The statistic and its limit are those above, on a grid over $(0,0.25]$.
+
+<<sup_nfci_lower>>=
+sup_nfci_lower <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI = 0", "ker-har",
+  arg_tau_grid = list(range = c(0, 0.25), n = 5),
+  arg_seed = 1
+)
+sup_nfci_lower
+@
+
+The same grid can be supplied directly:
+
+<<sup_nfci_lower_grid>>=
+sup_nfci_lower_grid <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI = 0", "ker-har",
+  arg_tau_grid = c(0.05, 0.10, 0.15, 0.20, 0.25),
+  arg_seed = 1
+)
+@
+
+These two calls give the same statistic, critical value, and p-value.
+Changing the range changes the hypothesis.
+Changing the grid changes its numerical evaluation.
+
+For a joint test of the predictive power of the financial and economic conditions, supply
+\texttt{c("ggdp = 0", "NFCI = 0")} instead. This is a different null, with two
+restrictions per quantile.
+
+\subsection{Read and plot the uniform confidence band}
+
+For a single restriction, the library computes a uniform confidence band following
+\citet[Section~4.3]{chen2026}.
+
+<<band, fig=TRUE, include=FALSE>>=
+sup_nfci_lower <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI = 0", "ker-har",
+  arg_tau_grid = list(range = c(0, 0.25), n = 5),
+  arg_seed = 1
+)
+band <- uniform_CI_band(sup_nfci_lower)
+# plot(sup_nfci_lower) draws the same band, as does arg_band_plot = TRUE in qrfstest_sup().
+@
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.86\linewidth]{fig_band.pdf}
+\caption{The 95\% uniform confidence band for the NFCI coefficient over the lower-tail grid.}
+\end{figure}
+
+\texttt{uniform\_CI\_band()} draws the band and returns its table invisibly, the same table as
+\texttt{sup\_nfci\_lower\$band}, which contains the estimates and limits.
+\texttt{sup\_nfci\_lower\$wald\_tau} contains the component statistics. With multiple
+restrictions, \texttt{qrfstest\_sup()} returns the joint Wald statistics at each quantile in
+\texttt{wald\_tau} and no band, and \texttt{uniform\_CI\_band()} stops.
+
+\FloatBarrier
+
+Similarly, to test whether GDP growth has predictive power for $\tau\in\mathcal T$,
+the null is
+\[
+ H_0:\ \bG(\tau)=0\quad\text{for all }\tau\in\mathcal T.
+\]
+The statistic and its limit are those of the sup test above with $r(\beta(\tau))=\bG(\tau)$.
+Use the following call:
+
+<<sup_gdp>>=
+sup_gdp <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "ggdp = 0", "ker-har",
+  arg_seed = 1
+)
+sup_gdp
+@
+
+\section{Shape restrictions on the NFCI coefficient}
+
+\subsection{Homogeneity test}
+
+This example uses the homogeneity test to examine whether the quantile coefficient of NFCI is
+constant across a range of quantiles. The homogeneity null in \citet[Section~4.4]{chen2026} is
+\[
+ H_0:\ \bN(\tau_2)=\bN(\tau_1)
+       \quad\text{for all }\tau_1\ne\tau_2\in\mathcal T.
+\]
+On the grid $\{\tau_1,\dots,\tau_n\}$ the statistic is
+\[
+ t_H(\mathcal T)=\max_{2\le i\le n}\sqrt T\,\big|\hat\beta_{\NFCI}(\tau_i)-\hat\beta_{\NFCI}(\tau_{i-1})\big|
+ \big/\hat\sigma(\tau_i,\tau_{i-1}),
+\]
+with $\hat\sigma(\tau_i,\tau_l)$ the estimated standard deviation of $\sqrt T$ times the difference
+\citep[Section~4.4]{chen2026}. Under the null,
+$t_H(\mathcal T)\Rightarrow\max_{2\le i\le n}|a_{i,i-1;j}'D(\bar\tau_n)^{-1}G(1,\bar\tau_n)|
+\big/\sqrt{a_{i,i-1;j}'H^{\iota}(\bar\tau_n)a_{i,i-1;j}}$ \citep[Proposition~4.2]{chen2026}, where
+$a_{i,l;j}$ selects $\beta_j(\tau_i)-\beta_j(\tau_l)$ from $\beta(\bar\tau_n)$, and
+$H^{\iota}(\bar\tau_n)$ is the covariance functional of the limit: the kernel functional
+$H(\bar\tau_n,b)$ of \citet[Proposition~4.2]{chen2026} for $\iota=\mathrm{KE}$, and its fixed-$K$
+counterpart for $\iota=\mathrm{OS}$. The critical value is the $(1-\alpha)$ quantile of this
+limit, simulated by Algorithm~3 of \citet{chen2026}.
+Use \texttt{qrfstest\_shape()} with \texttt{arg\_test = "homogeneity"}:
+
+<<homogeneous>>=
+homogeneous <- qrfstest_shape(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+  arg_test = "homogeneity", arg_seed = 1
+)
+homogeneous
+@
+
+To supply a different grid, use the same grid argument as for the sup test:
+
+<<homogeneous_grid>>=
+homogeneous_grid <- qrfstest_shape(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+  arg_test = "homogeneity",
+  arg_tau_grid = c(0.1, 0.25, 0.5, 0.75, 0.9),
+  arg_seed = 1
+)
+homogeneous_grid$p_value
+@
+
+Choose the range and grid to reflect the empirical question.
+
+\subsection{Monotonicity test}
+
+This example tests whether the quantile coefficient of NFCI is weakly increasing across quantiles.
+The monotonicity null in \citet[Section~4.4]{chen2026} is
+\[
+ H_0:\ \bN(\tau_2)-\bN(\tau_1)\ge0
+       \quad\text{for all }\tau_2>\tau_1\text{ in }\mathcal T.
+\]
+The statistic is
+\[
+ t_M(\mathcal T)=\min_{i>l}\sqrt T\,\big\{\hat\beta_{\NFCI}(\tau_i)-\hat\beta_{\NFCI}(\tau_l)\big\}
+ \big/\hat\sigma(\tau_i,\tau_l)
+\]
+over the adjacent pairs $l=i-1$ (\texttt{"monotonicity\_adjacent"}) or over all pairs
+(\texttt{"monotonicity\_allpair"}), reported with its sign reversed so that large values reject.
+Under the least favorable null of a constant coefficient,
+$t_M(\mathcal T)\Rightarrow\min_{i>l}a_{i,l;j}'D(\bar\tau_n)^{-1}G(1,\bar\tau_n)
+\big/\sqrt{a_{i,l;j}'H^{\iota}(\bar\tau_n)a_{i,l;j}}$ \citep[Proposition~4.2]{chen2026}, with $a_{i,l;j}$
+and $H^{\iota}(\bar\tau_n)$ as above. The reported critical value is the $(1-\alpha)$ quantile of
+$-t_M(\mathcal T)$, simulated by
+Algorithm~3 of \citet{chen2026}.
+Use \texttt{arg\_alternative = "decreasing"} to test this null.
+
+<<monotone_adjacent>>=
+monotone_adjacent <- qrfstest_shape(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+  arg_test = "monotonicity_adjacent",
+  arg_alternative = "decreasing", arg_seed = 1
+)
+monotone_adjacent
+@
+
+The adjacent procedure compares consecutive fitted quantiles, as in
+\citet[Section~5]{chen2026}.
+
+For all pairwise comparisons, as in \citet[Section~4.4]{chen2026}, change the test choice:
+
+<<monotone_all>>=
+monotone_all <- qrfstest_shape(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+  arg_test = "monotonicity_allpair",
+  arg_alternative = "decreasing", arg_seed = 1
+)
+monotone_all
+@
+
+Both procedures test the weakly increasing null on the chosen grid, but use different
+sets of comparisons and can give different statistics and critical values.
+Negative reported statistics are allowed.
+
+To reverse the null and alternative, set \texttt{arg\_alternative = "increasing"}.
+To choose the grid explicitly, add \texttt{arg\_tau\_grid}, for example:
+
+<<monotone_grid>>=
+monotone_grid <- qrfstest_shape(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+  arg_test = "monotonicity_adjacent",
+  arg_alternative = "decreasing",
+  arg_tau_grid = c(0.1, 0.25, 0.5, 0.75, 0.9),
+  arg_seed = 1
+)
+@
+
+\Needspace{12\baselineskip}
+\section{Options related to computing smoothing parameter \texorpdfstring{$b$ or $K$}{b or K}}
+
+The same hypothesis can be evaluated with either HAR method and with automatic or
+user-provided smoothing. These choices generally change the statistic and critical value.
+By default, the test statistic uses \texttt{arg\_M = "test\_optimal"} for Bartlett HAR
+and \texttt{arg\_K = "test\_optimal"} for OS HAR with the DCT-II basis.
+\texttt{qrhac} uses \texttt{arg\_M = "mse\_optimal\_ar"} and \texttt{arg\_K = "mse\_optimal\_var"} by default.
+For sup and shape tests, the nuisance covariance uses
+\texttt{arg\_M\_lambda = "mse\_optimal\_ar"} for Bartlett HAR and
+\texttt{arg\_K\_lambda = "mse\_optimal\_var"} for OS HAR.
+
+The test-based rule follows \citet[Section~4.5]{chen2026}. Sup and shape tests use
+the stacked rule with the restrictions for their test. Automatic $K$ selection uses a
+minimum of the test dimension plus four: $q+4$ for stacked, $q_0+4$ for sup, and 5 for
+shape. Nuisance selection uses $mp+4$. \texttt{qrhac} uses the minimum $q$, since its $\chi^2_q$ limit
+requires only that the variance estimator be full rank. The data-dependent rules also include
+\texttt{"simple"}, \texttt{"mse\_optimal\_ar"}, and \texttt{"mse\_optimal\_var"}.
+
+The test-based and VAR-based MSE rules use a VAR(1) approximation to the stacked scores.
+The AR-based MSE rule uses a separate AR(1) for each score column.
+By default (\texttt{arg\_var\_fit = "gaussian"}), a bivariate-normal approximation for
+indicator dependence is combined with regressor dependence, following \citet{galvao2024}
+and \citet[Section~4.5]{chen2026}.
+The default threshold is $\Phi^{-1}(\tau)$.
+Setting \texttt{arg\_threshold\_method = "empirical"} uses $\hat q_\tau$, the empirical
+quantile of standardized residuals.
+With \texttt{arg\_var\_fit = "ols"}, the AR(1) or VAR(1) is fitted directly to the scores
+by least squares. The requirement $T-1>mp$ applies only to the OLS VAR fit.
+In either case the fitted coefficients are held within the stationarity bound
+\texttt{arg\_var\_stationary} ($0.97$ by default). Under \texttt{"unrestricted"} a fit that is not
+stationary is an error.
+
+For example, evaluate the stacked equality test at a user-provided $M=12$ or $K=20$:
+
+<<fixed_smoothing>>=
+fixed_ker <- qrfstest_stacked(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "ker-har",
+  arg_M = 12, arg_seed = 1
+)
+fixed_os <- qrfstest_stacked(
+  ggdp_h1 ~ ggdp + NFCI, adrian,
+  "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "os-har",
+  arg_K = 20
+)
+@
+
+For sup or shape tests, test smoothing and nuisance smoothing are separate inputs:
+
+<<nuisance_choice>>=
+sup_os <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI = 0", "os-har",
+  arg_tau_grid = list(range = c(0, 0.25), n = 5),
+  arg_K = 40, arg_K_lambda = 30, arg_seed = 1
+)
+@
+
+Numeric choices are used as supplied within the admissible limits. For this data,
+$1\le M\le171$ and $K\le170$. Test $K$ must also cover the rank of each Wald statistic.
+The nuisance choice is used to estimate the long-run covariance for critical-value simulation.
+Stacked tests do not require it.
+
+When simulation is used, the functions generate 10\,000 draws. Bartlett simulations use
+1\,000 Brownian bridge grid intervals. The p-value is the fraction of simulated statistics
+at least as large as the observed one. When none of the draws reaches the observed
+statistic, the p-value is printed as \texttt{p-val < 0.0001}, indicating the simulation
+resolution rather than an upper confidence bound on the limiting p-value.
+
+The calls above pass \texttt{arg\_seed = 1} to reproduce their simulated critical values and
+p-values. Calling \texttt{set.seed()} immediately before a test is equivalent:
+
+<<external_seed>>=
+set.seed(1)
+sup_external_seed <- qrfstest_sup(
+  ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI = 0", "ker-har"
+)
+@
+
+This reproduces \texttt{sup\_nfci}. Without a seed (\texttt{arg\_seed = NULL}, the default) a test
+uses and advances the current random-number stream. Use the same seed when comparing equivalent
+inputs.
+Set \texttt{arg\_alpha} to change the significance level. It is also used by the
+\texttt{"test\_optimal"} rule.
+
+The default Hessian estimator is \texttt{arg\_hinv\_method = "ker"}, the kernel estimator of
+eq.~(4) of the paper as implemented in \texttt{quantreg}. The \texttt{"nid"} option selects its sparsity
+estimator instead. A different Hessian choice changes the statistics, not the procedures.
+
+The quantile regressions are fitted by \texttt{quantreg::rq}. Its solver is chosen by
+\texttt{arg\_rq\_method}: \texttt{"br"} (default) is the Barrodale--Roberts simplex, \texttt{"fn"}
+the Frisch--Newton interior point used in the code of \citet{adrian2019}. On these data the
+two agree to $10^{-7}$ in every coefficient.
+
+\Needspace{20\baselineskip}
+\section{Use the returned results}
+
+Printing a result shows the hypothesis, statistic, critical value, p-value, and selected
+smoothing. The object also stores these values for subsequent analysis:
+
+<<result_fields>>=
+data.frame(
+  statistic = stacked_ker$stat,
+  critical_value = unname(stacked_ker$cv),
+  p_value = stacked_ker$p_value,
+  reject = stacked_ker$reject,
+  M = stacked_ker$M_effective
+)
+round(coef(stacked_os), 3)
+@
+
+\texttt{summary()} adds what the printout leaves out: the estimates, the limit that calibrates
+the critical value, and the nuisance smoothing of a sup or shape test.
+
+<<summary>>=
+summary(sup_nfci_lower)
+@
+
+Use \texttt{K\_effective} for selected OS smoothing, and \texttt{M\_lambda} or
+\texttt{K\_lambda} for nuisance smoothing. Shape results also contain
+\texttt{difference} and \texttt{t\_ratio}. Sup results contain \texttt{wald\_tau}
+and, for one restriction, \texttt{band}. The reference manual describes all arguments
+and return fields.
+
+\bibliographystyle{plainnat}
+\bibliography{qrfs_references}
+\end{document}
