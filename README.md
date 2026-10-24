@@ -54,7 +54,7 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 `qrfstest_shape()` performs the homogeneity test of $H_0: \beta_{NFCI}(\tau)$ is constant in
 $\tau$ over $(0, 1)$, and the monotonicity test of $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in
 $\tau$ over $(0, 1)$. When `arg_tau_grid` is not specified, the default grid is
-$\{0.1, 0.3, 0.5, 0.7, 0.9\}$ over $(0, 1)$. Supply a vector such as `c(0.1, 0.5, 0.9)` to specify
+$\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$ over $(0, 1)$. Supply a vector such as `c(0.1, 0.5, 0.9)` to specify
 the grid directly, or `list(range = c(0.1, 0.9), n = 5)` to generate a grid over a specified range.
 
 `qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
