@@ -73,9 +73,13 @@ $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau \in (0, 1)$ over adjacent q
 `"monotonicity_allpair"` tests it over every pair of quantiles. `arg_alternative = "increasing"`
 reverses the null inequality. The grid is chosen as for the homogeneity test.
 
+## Documentation
+
 `qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
 paper's application. See `?qrfstest_stacked`, `?qrfstest_sup`, `?qrfstest_shape` and the
 vignette source in `vignettes/QRfs.Rnw`.
+
+## Data
 
 The data `adrian` are the Adrian, Boyarchenko and Giannone (2019) one-quarter-ahead regression
 data (openICPSR 113169, CC BY 4.0).
