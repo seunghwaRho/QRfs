@@ -46,7 +46,8 @@ $\tau \in (0, 0.25]$ with the sup statistic. `uniform_CI_band()` provides the un
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_test = "homogeneity")
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
-               arg_test = "monotonicity_adjacent", arg_alternative = "decreasing")
+               arg_test = "monotonicity_adjacent",
+               arg_alternative = "decreasing")
 ```
 
 `qrfstest_shape()` performs the homogeneity test of $H_0: \beta_{NFCI}(\tau)$ is constant in
