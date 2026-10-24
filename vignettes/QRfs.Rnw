@@ -8,6 +8,8 @@
 \usepackage{amsmath,amssymb,graphicx,booktabs,tabularx,needspace}
 \usepackage{listings,xcolor,placeins}
 \usepackage[noae]{Sweave}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,fontshape=sl}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
 \SweaveOpts{keep.source=TRUE}
 \usepackage[authoryear,round]{natbib}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
