@@ -26,7 +26,6 @@ qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
 
 `qrfstest_stacked()` performs the hypothesis test of
 $H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the stack-Wald statistic.
-Several hypothesis strings are tested jointly.
 
 ### Uniform test over a quantile range
 
