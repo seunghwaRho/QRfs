@@ -47,6 +47,13 @@ $\tau \in (0, 0.25]$ with the sup statistic. `uniform_CI_band()` provides the un
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_test = "homogeneity")
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+               arg_test = "homogeneity",
+               arg_tau_grid = c(0.1, 0.25, 0.5, 0.75, 0.9))
+qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+               arg_test = "homogeneity",
+               arg_tau_grid = list(range = c(0.1, 0.9), n = 5))
+
+qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_test = "monotonicity_adjacent",
                arg_alternative = "decreasing")
 ```
