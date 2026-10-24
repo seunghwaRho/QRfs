@@ -51,8 +51,7 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 ```
 
 `qrfstest_shape()` performs the homogeneity test of $H_0: \beta_{NFCI}(\tau)$ is constant in
-$\tau$, and the monotonicity test of $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau$, here
-against the alternative that it is decreasing.
+$\tau$, and the monotonicity test of $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau$.
 
 `"ker-har"` is the Bartlett kernel (fixed-*b*), `"os-har"` the orthonormal series (fixed-*K*)
 HAR family. `qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
