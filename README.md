@@ -26,6 +26,8 @@ qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
 
 `qrfstest_stacked()` performs the hypothesis test of
 $H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the stack-Wald statistic.
+`"ker-har"` selects fixed-*b* inference with the Bartlett kernel, `"os-har"` fixed-*K* inference
+with the DCT-II orthonormal basis functions.
 
 ### Uniform test over a quantile range
 
@@ -52,8 +54,7 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 `qrfstest_shape()` performs the homogeneity test of $H_0: \beta_{NFCI}(\tau)$ is constant in
 $\tau$, and the monotonicity test of $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau$.
 
-`"ker-har"` is the Bartlett kernel (fixed-*b*), `"os-har"` the orthonormal series (fixed-*K*)
-HAR family. `qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
+`qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
 paper's application. See `?qrfstest_stacked`, `?qrfstest_sup`, `?qrfstest_shape` and the
 vignette source in `vignettes/QRfs.Rnw`.
 
