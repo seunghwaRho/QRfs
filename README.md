@@ -15,9 +15,48 @@ remotes::install_github("seunghwaRho/QRfs")
 
 ```r
 library(QRfs)
+```
+
+### Stack-Wald test at specified quantiles
+
+```r
 qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
                  "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "os-har")
 ```
+
+`qrfstest_stacked()` performs the hypothesis test of
+$H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the stack-Wald statistic.
+Several hypothesis strings are tested jointly.
+
+### Uniform test over a quantile range
+
+```r
+sup <- qrfstest_sup(ggdp_h1 ~ ggdp + NFCI, adrian,
+                    "NFCI = 0", "ker-har",
+                    arg_tau_grid = list(range = c(0, 0.25), n = 5))
+uniform_CI_band(sup)
+```
+
+`qrfstest_sup()` performs uniform inference for $H_0: \beta_{NFCI}(\tau) = 0$ for all
+$\tau \in (0, 0.25]$ with the sup statistic. `uniform_CI_band()` provides the uniform confidence band.
+
+### Shape tests of one coefficient
+
+```r
+qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+               arg_test = "homogeneity")
+qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
+               arg_test = "monotonicity_adjacent", arg_alternative = "decreasing")
+```
+
+`qrfstest_shape()` performs the homogeneity test of $H_0: \beta_{NFCI}(\tau)$ is constant in
+$\tau$, and the monotonicity test of $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau$, here
+against the alternative that it is decreasing.
+
+`"ker-har"` is the Bartlett kernel (fixed-*b*), `"os-har"` the orthonormal series (fixed-*K*)
+HAR family. `qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
+paper's application. See `?qrfstest_stacked`, `?qrfstest_sup`, `?qrfstest_shape` and the
+vignette source in `vignettes/QRfs.Rnw`.
 
 The data `adrian` are the Adrian, Boyarchenko and Giannone (2019) one-quarter-ahead regression
 data (openICPSR 113169, CC BY 4.0).
