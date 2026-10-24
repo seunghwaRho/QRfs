@@ -38,10 +38,11 @@ sup <- qrfstest_sup(ggdp_h1 ~ ggdp + NFCI, adrian,
 uniform_CI_band(sup)
 ```
 
-`qrfstest_sup()` performs uniform inference for $H_0: \beta_{NFCI}(\tau) = 0$ for all
-$\tau \in \mathcal{T}$ with the sup statistic. When `arg_tau_grid` is not specified, $\mathcal{T} = (0, 1)$
-discretized at $\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$. The example above sets $\mathcal{T} = (0, 0.25]$
-with five grid points. `uniform_CI_band()` provides the uniform confidence band.
+`qrfstest_sup()` performs a uniform-in-$\tau$ hypothesis test over a range of quantiles $\mathcal{T}$
+with the sup statistic. The example above tests $H_0: \beta_{NFCI}(\tau) = 0$ for all
+$\tau \in (0, 0.25]$, discretized at five grid points. When `arg_tau_grid` is not specified,
+$\mathcal{T} = (0, 1)$ discretized at $\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$. `uniform_CI_band()`
+provides the uniform confidence band.
 
 ### Homogeneity test
 
