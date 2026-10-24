@@ -41,7 +41,7 @@ uniform_CI_band(sup)
 `qrfstest_sup()` performs uniform inference for $H_0: \beta_{NFCI}(\tau) = 0$ for all
 $\tau \in (0, 0.25]$ with the sup statistic. `uniform_CI_band()` provides the uniform confidence band.
 
-### Shape tests of one coefficient
+### Homogeneity test
 
 ```r
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
@@ -52,17 +52,26 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_test = "homogeneity",
                arg_tau_grid = list(range = c(0.1, 0.9), n = 5))
+```
 
+`qrfstest_shape()` with `arg_test = "homogeneity"` performs the homogeneity test of
+$H_0: \beta_{NFCI}(\tau)$ is constant in $\tau \in (0, 1)$. When `arg_tau_grid` is not specified,
+the default grid is $\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$ over $(0, 1)$. Supply a vector such as
+`c(0.1, 0.25, 0.5, 0.75, 0.9)` to specify the grid directly, or `list(range = c(0.1, 0.9), n = 5)`
+to generate a grid over a specified range.
+
+### Monotonicity test
+
+```r
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_test = "monotonicity_adjacent",
                arg_alternative = "decreasing")
 ```
 
-`qrfstest_shape()` performs the homogeneity test of $H_0: \beta_{NFCI}(\tau)$ is constant in
-$\tau \in (0, 1)$, and the monotonicity test of $H_0: \beta_{NFCI}(\tau)$ is non-decreasing in
-$\tau \in (0, 1)$. When `arg_tau_grid` is not specified, the default grid is
-$\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$ over $(0, 1)$. Supply a vector such as `c(0.1, 0.5, 0.9)` to specify
-the grid directly, or `list(range = c(0.1, 0.9), n = 5)` to generate a grid over a specified range.
+`qrfstest_shape()` with `arg_test = "monotonicity_adjacent"` performs the monotonicity test of
+$H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau \in (0, 1)$ over adjacent quantiles.
+`"monotonicity_allpair"` tests it over every pair of quantiles. `arg_alternative = "increasing"`
+reverses the null inequality. The grid is chosen as for the homogeneity test.
 
 `qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
 paper's application. See `?qrfstest_stacked`, `?qrfstest_sup`, `?qrfstest_shape` and the
