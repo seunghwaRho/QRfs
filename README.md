@@ -52,9 +52,6 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_test = "homogeneity",
                arg_tau_grid = c(0.1, 0.25, 0.5, 0.75, 0.9))
-qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
-               arg_test = "homogeneity",
-               arg_tau_grid = list(range = c(0.1, 0.9), n = 5))
 ```
 
 `qrfstest_shape()` with `arg_test = "homogeneity"` performs the homogeneity test of one
