@@ -1,8 +1,11 @@
 # QRfs
 
-Fixed-smoothing (fixed-*b* and fixed-*K*) HAR inference for time-series quantile regression,
-following Chen, Galvao, Rho, Vogelsang and Yoon (2026), *Fixed-smoothing Uniform Inference for
-Quantile Regression*.
+QRfs implements fixed-smoothing (fixed-*b* and fixed-*K*) methods for heteroskedasticity and
+autocorrelation robust (HAR) inference in time-series quantile regression, following Chen, Galvao,
+Rho, Vogelsang and Yoon (2026), *Fixed-smoothing Uniform Inference for Quantile Regression*.
+Accounting for dependence both over time and across quantiles, it provides stack-Wald tests of
+joint linear restrictions at specified quantiles, uniform sup tests and confidence bands over a
+quantile range, and tests of coefficient homogeneity and monotonicity.
 
 ## Installation
 
