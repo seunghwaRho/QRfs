@@ -17,19 +17,7 @@ remotes::install_github("seunghwaRho/QRfs")
 library(QRfs)
 ```
 
-### Stack-Wald test at specified quantiles
-
-```r
-qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
-                 "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "os-har")
-```
-
-`qrfstest_stacked()` performs the hypothesis test of
-$H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the stack-Wald statistic.
-`arg_har_method = "ker-har"` chooses fixed-*b* inference with the Bartlett kernel, `"os-har"`
-fixed-*K* inference with the DCT-II orthonormal series.
-
-### Uniform test over a quantile range
+### Uniform sup test over a quantile range
 
 ```r
 sup <- qrfstest_sup(ggdp_h1 ~ ggdp + NFCI, adrian,
@@ -43,6 +31,18 @@ with the sup statistic. The example above tests $H_0: \beta_{NFCI}(\tau) = 0$ fo
 $\tau \in (0, 0.25]$, discretized at five grid points. When `arg_tau_grid` is not specified,
 $\mathcal{T} = (0, 1)$ discretized at $\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$. `uniform_CI_band()`
 provides the uniform confidence band.
+`arg_har_method = "ker-har"` chooses fixed-*b* inference with the Bartlett kernel, `"os-har"`
+fixed-*K* inference with the DCT-II orthonormal series.
+
+### Stack-Wald test at specified quantiles
+
+```r
+qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
+                 "NFCI[0.1] = NFCI[0.5] = NFCI[0.9]", "os-har")
+```
+
+`qrfstest_stacked()` performs the hypothesis test of
+$H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the stack-Wald statistic.
 
 ### Homogeneity test
 
