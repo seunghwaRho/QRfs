@@ -44,8 +44,8 @@ qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
 ```
 
 `qrfstest_stacked()` performs a test of joint linear restrictions at specified quantiles. The
-example above tests $H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$, two
-equalities at the quantiles 0.1, 0.5 and 0.9, with the stack-Wald statistic.
+example above tests $H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the
+stack-Wald statistic.
 
 ### Homogeneity test
 
