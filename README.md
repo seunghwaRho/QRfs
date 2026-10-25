@@ -14,11 +14,15 @@ quantile range, and tests of coefficient homogeneity and monotonicity.
 remotes::install_github("seunghwaRho/QRfs")
 ```
 
-## Example
+## Examples
 
 ```r
 library(QRfs)
 ```
+
+The examples use the included `adrian` data from Adrian, Boyarchenko and Giannone (2019),
+regressing one-quarter-ahead GDP growth (`ggdp_h1`) on current GDP growth (`ggdp`) and the
+Chicago Fed National Financial Conditions Index (`NFCI`).
 
 ### Uniform sup test over a quantile range
 
@@ -30,7 +34,7 @@ uniform_CI_band(sup)
 ```
 
 `qrfstest_sup()` performs a uniform-in-τ hypothesis test over a range of quantiles $\mathcal{T}$
-with the sup statistic. The example above tests $H_0: \beta_{NFCI}(\tau) = 0$ for all
+with the sup-Wald statistic. The example above tests $H_0: \beta_{NFCI}(\tau) = 0$ for all
 $\tau \in (0, 0.25]$, discretized at five grid points. `uniform_CI_band()` provides the uniform
 confidence band.
 `arg_har_method = "ker-har"` chooses fixed-*b* inference with the Bartlett kernel, `"os-har"`
@@ -57,9 +61,8 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_tau_grid = c(0.1, 0.25, 0.5, 0.75, 0.9))
 ```
 
-`qrfstest_shape()` with `arg_test = "homogeneity"` performs the homogeneity test of one
-coefficient over a range of quantiles $\mathcal{T}$, $H_0: \beta_j(\tau)$ is constant in
-$\tau \in \mathcal{T}$. The examples
+The homogeneity test assesses whether the NFCI coefficient is constant across the range of
+quantiles $\mathcal{T}$. The examples
 above test the NFCI coefficient over $\mathcal{T} = (0, 1)$ with the discretized grid of
 $\lbrace 0.1, 0.25, 0.5, 0.75, 0.9 \rbrace$. One can also specify a range and the number of grid points,
 such as `arg_tau_grid = list(range = c(0, 0.25), n = 5)`.
@@ -72,16 +75,16 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_alternative = "decreasing")
 ```
 
-`qrfstest_shape()` with `arg_test = "monotonicity_adjacent"` performs the monotonicity test of one
-coefficient over a range of quantiles $\mathcal{T}$, $H_0: \beta_j(\tau)$ is non-decreasing in
-$\tau \in \mathcal{T}$, over adjacent quantiles. `"monotonicity_allpair"` tests it over every pair
-of quantiles. `arg_alternative = "increasing"` tests $H_0: \beta_j(\tau)$ is non-increasing in
-$\tau \in \mathcal{T}$. The example above tests the NFCI coefficient over $\mathcal{T} = (0, 1)$.
+This example tests whether the NFCI coefficient is non-decreasing across quantiles, using
+adjacent differences on the default grid. To test whether the coefficient is non-increasing
+across quantiles, use `arg_alternative = "increasing"`.
+`"monotonicity_allpair"` tests the same null using all pairs of grid quantiles.
 
 ## Documentation
 
-`qrfs_example("stacked")`, `"sup"` and `"shape"` run the worked examples of the
-paper's application. See `?qrfstest_stacked`, `?qrfstest_sup`, `?qrfstest_shape` and the
+Worked examples using the Adrian, Boyarchenko and Giannone (2019) data are available through
+`qrfs_example("stacked")`, `qrfs_example("sup")`, and `qrfs_example("shape")`.
+See `?qrfstest_stacked`, `?qrfstest_sup`, `?qrfstest_shape` and the
 vignette source in `vignettes/QRfs.Rnw`.
 
 ## Data
