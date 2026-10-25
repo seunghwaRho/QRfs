@@ -20,10 +20,6 @@ remotes::install_github("seunghwaRho/QRfs")
 library(QRfs)
 ```
 
-The examples use the included `adrian` data from Adrian, Boyarchenko and Giannone (2019),
-regressing one-quarter-ahead GDP growth (`ggdp_h1`) on current GDP growth (`ggdp`) and the
-Chicago Fed National Financial Conditions Index (`NFCI`).
-
 ### Uniform sup test over a quantile range
 
 ```r
