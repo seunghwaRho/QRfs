@@ -59,11 +59,13 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_tau_grid = list(range = c(0.1, 0.9), n = 5))
 ```
 
-`qrfstest_shape()` with `arg_test = "homogeneity"` performs the homogeneity test of
-$H_0: \beta_{NFCI}(\tau)$ is constant in $\tau \in (0, 1)$. When `arg_tau_grid` is not specified,
-the default grid is $\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$ over $(0, 1)$. Supply a vector such as
-`c(0.1, 0.25, 0.5, 0.75, 0.9)` to specify the grid directly, or `list(range = c(0.1, 0.9), n = 5)`
-to generate a grid over a specified range.
+`qrfstest_shape()` with `arg_test = "homogeneity"` performs the homogeneity test that one
+coefficient is constant across a range of quantiles $\mathcal{T}$,
+$H_0: \beta_j(\tau_1) = \beta_j(\tau_2)$ for all $\tau_1 \ne \tau_2 \in \mathcal{T}$. The examples
+above test the NFCI coefficient over $\mathcal{T} = (0, 1)$, on the grid
+$\lbrace 0.1, 0.25, 0.5, 0.75, 0.9 \rbrace$, and over $[0.1, 0.9]$ with five grid points. When
+`arg_tau_grid` is not specified, $\mathcal{T} = (0, 1)$ discretized at
+$\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$.
 
 ### Monotonicity test
 
