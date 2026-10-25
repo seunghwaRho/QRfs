@@ -26,8 +26,8 @@ qrfstest_stacked(ggdp_h1 ~ ggdp + NFCI, adrian,
 
 `qrfstest_stacked()` performs the hypothesis test of
 $H_0: \beta_{NFCI}(0.1) = \beta_{NFCI}(0.5) = \beta_{NFCI}(0.9)$ with the stack-Wald statistic.
-`"ker-har"` selects fixed-*b* inference with the Bartlett kernel, `"os-har"` fixed-*K* inference
-with the DCT-II orthonormal basis functions.
+`arg_har_method = "ker-har"` chooses fixed-*b* inference with the Bartlett kernel, `"os-har"`
+fixed-*K* inference with the DCT-II orthonormal series.
 
 ### Uniform test over a quantile range
 
