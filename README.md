@@ -74,10 +74,12 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
                arg_alternative = "decreasing")
 ```
 
-`qrfstest_shape()` with `arg_test = "monotonicity_adjacent"` performs the monotonicity test of
-$H_0: \beta_{NFCI}(\tau)$ is non-decreasing in $\tau \in (0, 1)$ over adjacent quantiles.
-`"monotonicity_allpair"` tests it over every pair of quantiles. `arg_alternative = "increasing"`
-reverses the null inequality. The grid is chosen as for the homogeneity test.
+`qrfstest_shape()` with `arg_test = "monotonicity_adjacent"` performs the monotonicity test that
+one coefficient is non-decreasing across a range of quantiles $\mathcal{T}$,
+$H_0: \beta_j(\tau_2) - \beta_j(\tau_1) \ge 0$ for all $\tau_1 < \tau_2 \in \mathcal{T}$, over
+adjacent quantiles. `"monotonicity_allpair"` tests it over every pair of quantiles.
+`arg_alternative = "increasing"` reverses the null inequality. The example above tests the
+NFCI coefficient over $\mathcal{T} = (0, 1)$. The grid is chosen as for the homogeneity test.
 
 ## Documentation
 
