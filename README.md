@@ -58,7 +58,8 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 coefficient over a range of quantiles $\mathcal{T}$, $H_0: \beta_j(\tau)$ is constant in
 $\tau \in \mathcal{T}$. The examples
 above test the NFCI coefficient over $\mathcal{T} = (0, 1)$ with the discretized grid of
-$\lbrace 0.1, 0.25, 0.5, 0.75, 0.9 \rbrace$.
+$\lbrace 0.1, 0.25, 0.5, 0.75, 0.9 \rbrace$. One can also specify a range and the number of grid points,
+such as `arg_tau_grid = list(range = c(0, 0.25), n = 5)`.
 
 ### Monotonicity test
 
