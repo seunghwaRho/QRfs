@@ -28,9 +28,8 @@ uniform_CI_band(sup)
 
 `qrfstest_sup()` performs a uniform-in-τ hypothesis test over a range of quantiles $\mathcal{T}$
 with the sup statistic. The example above tests $H_0: \beta_{NFCI}(\tau) = 0$ for all
-$\tau \in (0, 0.25]$, discretized at five grid points. When `arg_tau_grid` is not specified,
-$\mathcal{T} = (0, 1)$ discretized at $\lbrace 0.1, 0.3, 0.5, 0.7, 0.9 \rbrace$. `uniform_CI_band()`
-provides the uniform confidence band.
+$\tau \in (0, 0.25]$, discretized at five grid points. `uniform_CI_band()` provides the uniform
+confidence band.
 `arg_har_method = "ker-har"` chooses fixed-*b* inference with the Bartlett kernel, `"os-har"`
 fixed-*K* inference with the DCT-II orthonormal series.
 
