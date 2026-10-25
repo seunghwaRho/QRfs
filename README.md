@@ -75,8 +75,8 @@ qrfstest_shape(ggdp_h1 ~ ggdp + NFCI, adrian, "NFCI", "ker-har",
 `qrfstest_shape()` with `arg_test = "monotonicity_adjacent"` performs the monotonicity test of one
 coefficient over a range of quantiles $\mathcal{T}$, $H_0: \beta_j(\tau)$ is non-decreasing in
 $\tau \in \mathcal{T}$, over adjacent quantiles. `"monotonicity_allpair"` tests it over every pair
-of quantiles. `arg_alternative = "increasing"` reverses the null inequality. The example above
-tests the NFCI coefficient over $\mathcal{T} = (0, 1)$.
+of quantiles. `arg_alternative = "increasing"` tests $H_0: \beta_j(\tau)$ is non-increasing in
+$\tau \in \mathcal{T}$. The example above tests the NFCI coefficient over $\mathcal{T} = (0, 1)$.
 
 ## Documentation
 
